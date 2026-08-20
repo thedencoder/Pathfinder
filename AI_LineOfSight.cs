@@ -7,17 +7,23 @@ public class AI_LineOfSight : MonoBehaviour
 
     void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Enemy").transform;
-    }   
+        GameObject enemy = GameObject.FindGameObjectWithTag("Enemy");
 
-    private bool hitCheck(Vector3 directionToTarget){
+        if (enemy != null)
+        {
+            target = enemy.transform;
+        }
+    }
+
+    private bool hitCheck(Vector3 directionToTarget)
+    {
         if (Physics.Raycast(
         transform.position,
         directionToTarget.normalized,
         out RaycastHit hit,
         sightRange))
         {
-        return hit.transform.CompareTag("Enemy");
+            return hit.transform.CompareTag("Enemy");
         }
         else
         {
@@ -27,12 +33,27 @@ public class AI_LineOfSight : MonoBehaviour
 
     public bool CanSeeTarget()
     {
-        Vector3 directionToTarget = target.position - transform.position;
-        if(Physics.Raycast(transform.position, directionToTarget, sightRange)&&hitCheck(directionToTarget))
+        if (target == null)
         {
-             
-             return true;
+            GameObject enemy = GameObject.FindGameObjectWithTag("Enemy");
+
+            if (enemy == null)
+            {
+                Debug.LogWarning("No enemies left.");
+                return false;
+            }
+
+            target = enemy.transform;
         }
-        return false;   
+
+        Vector3 directionToTarget = target.position - transform.position;
+
+        if (Physics.Raycast(transform.position, directionToTarget, sightRange)
+            && hitCheck(directionToTarget))
+        {
+            return true;
+        }
+
+        return false;
     }
 }
