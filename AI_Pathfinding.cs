@@ -1,48 +1,54 @@
 using UnityEngine;
 public class AI_Pathfinding : MonoBehaviour
 {
-    [SerializeField] private String targetTag = "Ignore";
+    [SerializeField] private string targetTag = "Ignore";
+    private GameObject currentTarget;
     private UnityEngine.AI.NavMeshAgent agent;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         agent= GetComponent<UnityEngine.AI.NavMeshAgent>();
+        currentTarget = GameObject.FindGameObjectWithTag("Target");
         
     }
 
     void DecisionMaking()
     {
-        if(targetTag==="Ignore")
+        //note: for optimization see if we can cache the LOS data so we dont have to do the raycast every frame.
+        if (GetComponent<AI_LineOfSight>().CanSeeTarget())
         {
-            targetTag = "Enemy";
+            Debug.Log("I can see the target!");
+             if(targetTag=="Ignore")
+        {
+            currentTarget = GameObject.FindGameObjectWithTag("Target");
         }
-        else if(targetTag==="Enemy")
+        else if(targetTag=="Rush")
         {
-            targetTag = "Ignore";
+            currentTarget = GameObject.FindGameObjectWithTag("Enemy");
         }
 
-        else if(targetTag==="Target")
+        else if(targetTag=="Cover")
         {
-            targetTag = "Ignore";
+            currentTarget = GameObject.FindGameObjectWithTag("Cover");
         }
         else
         {
             Debug.LogError("Invalid target tag. Please use 'Ignore', 'Cover', or 'Rush'.");
+            currentTarget = null;
         }
-
-        if (GetComponent<AI_LineOfSight>().CanSeeTarget())
-        {
-            Debug.Log("I can see the target!");
         }
         else
         {
             Debug.Log("I cannot see the target!");
+            currentTarget = GameObject.FindGameObjectWithTag("Target");
         }
     }
+
+    
     void Update()
     {
         DecisionMaking();
-        agent.SetDestination(GameObject.FindGameObjectWithTag("Target").transform.position);
+        agent.SetDestination(currentTarget.transform.position);
     
 
     }
